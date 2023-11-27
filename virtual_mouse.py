@@ -1,15 +1,19 @@
 
-import cv2 as cv 
-import numpy as np 
 from pynput.mouse import Button, Controller
+import numpy as np 
+import cv2 as cv 
 import wx
 
 mouse = Controller()
 app = wx.App(False)
+
 (sx,sy) = wx.GetDisplaySize()
 (camx,camy) = (320,240)
 
-cam = cv.VideoCapture(0)
+# url = 0
+url = 'https://imvickykumar999:imvickykumar999@192.168.0.102:8080/video'
+
+cam = cv.VideoCapture(url)
 cam.set(3,camx)
 cam.set(4,camy)
 
@@ -21,6 +25,7 @@ pinch_flag = 0
 while(1):
     ret,img = cam.read()
     img = cv.GaussianBlur(img,(5,5),0)
+
     hsv_img = cv.cvtColor(img,cv.COLOR_BGR2HSV)
     mask = cv.inRange(hsv_img,np.array([33,80,40]),np.array([102,255,255]))
 
@@ -30,14 +35,18 @@ while(1):
 
     conts,_ = cv.findContours(mask_final.copy(),cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
     cv.drawContours(img,conts,-1,(0,0,255),3)
+
     if(len(conts)==2):
         if(pinch_flag==1):
             pinch_flag = 0    
             mouse.release(Button.left)
+
         x1,y1,w1,h1 = cv.boundingRect(conts[0])
         x2,y2,w2,h2 = cv.boundingRect(conts[1])
+
         cv.rectangle(img,(x1,y1),(x1+w1,y1+h1),(255,0,0),2)
         cv.rectangle(img,(x2,y2),(x2+w2,y2+h2),(255,0,0),2)
+
         cx1 = round(x1+w1/2)
         cy1 = round(y1+h1/2)
         cx2 = round(x2+w2/2)
@@ -46,6 +55,7 @@ while(1):
         cx = round(cx1/2+cx2/2)
         cy = round(cy1/2+cy2/2)
         cv.circle(img,(cx,cy),2,(0,0,255),2)
+
         mouseloc = mlocold+((cx,cy)-mlocold)/damfac
         mouse.position = (round(sx - (mouseloc[0]*sx/camx)),round((mouseloc[1]*sy/camy)))
         mlocold = mouseloc
@@ -59,15 +69,17 @@ while(1):
         cv.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
         cx = round(x+w/2)
         cy = round(y+h/2)
+
         cv.circle(img,(cx,cy),20,(0,0,255),2)
         mouseloc = mlocold+((cx,cy)-mlocold)/damfac
         mouse.position = (round(sx - mouseloc[0]*sx/camx),round(mouseloc[1]*sy/camy))
         mlocold = mouseloc
 
     cv.imshow("cam",img)
-    cv.imshow("mask",mask)
-    cv.imshow("mask open",mask_open)
-    cv.imshow("mask close",mask_close)
+    # cv.imshow("mask",mask)
+    # cv.imshow("mask open",mask_open)
+    # cv.imshow("mask close",mask_close)
+
     if cv.waitKey(10) == 13:
         break
 
