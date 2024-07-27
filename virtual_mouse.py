@@ -10,8 +10,8 @@ app = wx.App(False)
 (sx,sy) = wx.GetDisplaySize()
 (camx,camy) = (320,240)
 
-# url = 0
-url = 'https://imvickykumar999:imvickykumar999@192.168.0.102:8080/video'
+url = 0
+#url = 'https://imvickykumar999:imvickykumar999@192.168.0.102:8080/video'
 
 cam = cv.VideoCapture(url)
 cam.set(3,camx)
